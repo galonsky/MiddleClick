@@ -49,7 +49,7 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
     [NSApplication sharedApplication];
 	
-	tap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
+	tap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
 	CGEventTapEnable(tap, TRUE);
 	
 	CFRunLoopSourceRef loop = CFMachPortCreateRunLoopSource(NULL, tap, 0);
