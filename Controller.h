@@ -44,9 +44,13 @@ MTDeviceRef dev;
 
 BOOL needToClick;
 BOOL maybeMiddleClick;
-BOOL pressed;
+BOOL threeDown;
+BOOL down, up;
+CFMachPortRef tap;
+
 
 int callback(int device, Finger *data, int nFingers, double timestamp, int frame);
+CGEventRef clickCallback (CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
 - (void) start;
 - (void)setMode:(BOOL)click;
 - (BOOL)getClickMode;

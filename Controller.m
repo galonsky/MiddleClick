@@ -20,12 +20,41 @@
 
 @implementation Controller
 
+CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
+{
+	NSLog(@"called");
+	CGPoint ourLoc = CGEventGetLocation(event);
+	
+	if(threeDown)
+	{
+		if(type == kCGEventLeftMouseUp)
+		{
+			NSLog(@"left up");
+			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
+			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
+		}
+		return NULL;
+	}
+
+
+	return event;
+}
+
 - (void) start
 {
-	pressed = NO;
+	down = NO;
+	up = NO;
 	needToClick = YES;
+	threeDown = NO;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
     [NSApplication sharedApplication];
+	
+	tap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
+	CGEventTapEnable(tap, TRUE);
+	
+	CFRunLoopSourceRef loop = CFMachPortCreateRunLoopSource(NULL, tap, 0);
+	CFRunLoopAddSource(CFRunLoopGetMain(), loop, kCFRunLoopDefaultMode);
+	
 	
 	
 	//Get list of all multi touch devices
@@ -71,19 +100,11 @@ int callback(int device, Finger *data, int nFingers, double timestamp, int frame
 		
 		if(nFingers == 3)
 		{
-			if(!pressed)
-			{
-				CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, true );
-				pressed = YES;
-			}
-			
+			threeDown = YES;
 		}
-		else {
-			if(pressed)
-			{
-				CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, false );
-				pressed = NO;
-			}
+		else
+		{
+			threeDown = NO;
 		}
 	}
 	else 
