@@ -22,14 +22,13 @@
 
 CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-	NSLog(@"called");
+	
 	CGPoint ourLoc = CGEventGetLocation(event);
 	
 	if(threeDown)
 	{
 		if(type == kCGEventLeftMouseUp)
 		{
-			NSLog(@"left up");
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
 		}
@@ -101,10 +100,12 @@ int callback(int device, Finger *data, int nFingers, double timestamp, int frame
 		if(nFingers == 3)
 		{
 			threeDown = YES;
+			CGEventTapEnable(tap, TRUE);
 		}
 		else
 		{
 			threeDown = NO;
+			CGEventTapEnable(tap, FALSE);
 		}
 	}
 	else 
