@@ -41,20 +41,25 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 
 - (void) start
 {
-	down = NO;
-	up = NO;
-	needToClick = YES;
 	threeDown = NO;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
     [NSApplication sharedApplication];
 	
+	
+	
 	tap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
-	CGEventTapEnable(tap, TRUE);
+	CGEventTapEnable(tap, FALSE);
 	
 	CFRunLoopSourceRef loop = CFMachPortCreateRunLoopSource(NULL, tap, 0);
 	CFRunLoopAddSource(CFRunLoopGetMain(), loop, kCFRunLoopDefaultMode);
 	
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *appDefaults = [NSDictionary
+								 dictionaryWithObject:@"NO" forKey:@"NeedToClick"];
 	
+    [defaults registerDefaults:appDefaults];
+	
+	needToClick = [[NSUserDefaults standardUserDefaults] boolForKey:@"NeedToClick"];
 	
 	//Get list of all multi touch devices
 	NSMutableArray* deviceList = (NSMutableArray*)MTDeviceCreateList(); //grab our device list
@@ -89,6 +94,14 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 - (void)setMode:(BOOL)click
 {
 	needToClick = click;
+	if(click)
+	{
+		[[NSUserDefaults standardUserDefaults] setObject:@"YES" forKey:@"NeedToClick"];
+	}
+	else {
+		[[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:@"NeedToClick"];
+	}
+
 }
 
 int callback(int device, Finger *data, int nFingers, double timestamp, int frame) {

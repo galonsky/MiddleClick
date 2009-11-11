@@ -45,7 +45,6 @@ MTDeviceRef dev;
 BOOL needToClick;
 BOOL maybeMiddleClick;
 BOOL threeDown;
-BOOL down, up;
 CFMachPortRef tap;
 
 
