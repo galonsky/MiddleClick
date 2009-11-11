@@ -22,16 +22,15 @@
 
 CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
-	NSLog(@"called");
 	CGPoint ourLoc = CGEventGetLocation(event);
 	
 	if(threeDown)
 	{
 		if(type == kCGEventLeftMouseUp)
 		{
-			NSLog(@"left up");
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
+			NSLog(@"posted");
 		}
 		return NULL;
 	}
@@ -42,14 +41,12 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 
 - (void) start
 {
-	down = NO;
-	up = NO;
 	needToClick = YES;
 	threeDown = NO;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
     [NSApplication sharedApplication];
 	
-	tap = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
+	tap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
 	CGEventTapEnable(tap, TRUE);
 	
 	CFRunLoopSourceRef loop = CFMachPortCreateRunLoopSource(NULL, tap, 0);
