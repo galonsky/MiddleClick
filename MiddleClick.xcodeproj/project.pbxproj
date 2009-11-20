@@ -17,6 +17,7 @@
 		75A6B6AB0FEE96540071FAC0 /* mouse.png in Resources */ = {isa = PBXBuildFile; fileRef = 75A6B6AA0FEE96540071FAC0 /* mouse.png */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		FA57A43A10B73B1800250436 /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA57A43910B73B1800250436 /* IOBluetooth.framework */; };
 		FAD94F9410A88A7800A520EC /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD94F9310A88A7800A520EC /* Controller.m */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +40,7 @@
 		75A6B6AA0FEE96540071FAC0 /* mouse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mouse.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* MiddleClick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MiddleClick.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA57A43910B73B1800250436 /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = /System/Library/Frameworks/IOBluetooth.framework; sourceTree = "<absolute>"; };
 		FAD94F9210A88A7800A520EC /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
 		FAD94F9310A88A7800A520EC /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,6 +54,7 @@
 				75A6B66C0FEE87AB0071FAC0 /* MultitouchSupport.framework in Frameworks */,
 				75A6B69D0FEE90530071FAC0 /* ApplicationServices.framework in Frameworks */,
 				7569F71E1007F64500D9CE54 /* IOKit.framework in Frameworks */,
+				FA57A43A10B73B1800250436 /* IOBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +140,7 @@
 				75A6B66B0FEE87AB0071FAC0 /* MultitouchSupport.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+				FA57A43910B73B1800250436 /* IOBluetooth.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

@@ -42,14 +42,18 @@ float middleclickX, middleclickY;
 float middleclickX2, middleclickY2;
 MTDeviceRef dev;
 
+BOOL initializing;
 BOOL needToClick;
 BOOL maybeMiddleClick;
 BOOL threeDown;
 CFMachPortRef tap;
-
+NSMutableArray* deviceList;
+void *refToSelf;
 
 int callback(int device, Finger *data, int nFingers, double timestamp, int frame);
 CGEventRef clickCallback (CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon);
+void createList();
+void resetDevices();
 - (void) start;
 - (void)setMode:(BOOL)click;
 - (BOOL)getClickMode;

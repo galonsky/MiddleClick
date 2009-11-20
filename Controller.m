@@ -14,11 +14,19 @@
 #include <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h> 
 #import "WakeObserver.h"
-
-
-
+#include <IOBluetooth/Bluetooth.h>
+#include <IOBluetooth/IOBluetoothUserLib.h>
+#include <IOBluetooth/objc/IOBluetoothDevice.h>
+#include <IOBluetooth/objc/IOBluetoothDeviceInquiry.h>
 
 @implementation Controller
+
+- (id)init
+{
+	[super init];
+	refToSelf = self;
+	return self;
+}
 
 CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event, void *refcon)
 {
@@ -39,13 +47,47 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 	return event;
 }
 
+void bluetoothConnection(void *userRefCon, IOBluetoothUserNotificationRef inRef, IOBluetoothObjectRef objectRef)
+{
+	if(!initializing)
+	{
+		createList();
+		resetDevices();
+	}
+}
+
+void createList()
+{
+	deviceList = (NSMutableArray*)MTDeviceCreateList();
+	NSLog(@"createList called");
+	int currentCount = [deviceList count];
+	NSLog(@"currentCount = %d", currentCount);
+	while ([deviceList count] < currentCount + 1) {
+		NSLog(@"%d", [deviceList count]);
+		deviceList = (NSMutableArray*)MTDeviceCreateList();
+	}
+	deviceList = (NSMutableArray*)MTDeviceCreateList();
+}
+
+void resetDevices()
+{
+	//Iterate and register callbacks for multitouch devices.
+	for(int i = 0; i<[deviceList count]; i++) //iterate available devices
+	{
+		MTRegisterContactFrameCallback((MTDeviceRef)[deviceList objectAtIndex:i], callback); //assign callback for device
+		MTDeviceStart((MTDeviceRef)[deviceList objectAtIndex:i]); //start sending events
+	}
+}
+
 - (void) start
 {
 	threeDown = NO;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
     [NSApplication sharedApplication];
 	
-	
+	initializing = YES;
+	IOBluetoothRegisterForDeviceConnectNotifications(bluetoothConnection, NULL);
+	initializing = NO;
 	
 	tap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, CGEventMaskBit(kCGEventLeftMouseUp) | CGEventMaskBit(kCGEventLeftMouseDown), clickCallback, NULL);
 	CGEventTapEnable(tap, FALSE);
@@ -61,18 +103,9 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 	
 	needToClick = [[NSUserDefaults standardUserDefaults] boolForKey:@"NeedToClick"];
 	
-	//Get list of all multi touch devices
-	NSMutableArray* deviceList = (NSMutableArray*)MTDeviceCreateList(); //grab our device list
-	
-	
-	//Iterate and register callbacks for multitouch devices.
-	for(int i = 0; i<[deviceList count]; i++) //iterate available devices
-	{
-		MTRegisterContactFrameCallback((MTDeviceRef)[deviceList objectAtIndex:i], callback); //assign callback for device
-		MTDeviceStart((MTDeviceRef)[deviceList objectAtIndex:i]); //start sending events
-	}
-	
-	
+	deviceList = (NSMutableArray*)MTDeviceCreateList(); //grab our device list
+	resetDevices();
+
 	//register a callback to know when osx come back from sleep
 	WakeObserver *wo = [[WakeObserver alloc] init];
 	[[[NSWorkspace sharedWorkspace] notificationCenter] addObserver: wo selector: @selector(receiveWakeNote:) name: NSWorkspaceDidWakeNotification object: NULL];
