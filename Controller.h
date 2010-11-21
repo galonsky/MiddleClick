@@ -37,6 +37,10 @@ void MTRegisterContactFrameCallback(MTDeviceRef, MTContactCallbackFunction);
 void MTDeviceStart(MTDeviceRef);
 CFMutableArrayRef MTDeviceCreateList(void); //returns a CFMutableArrayRef array of all multitouch devices
 
+BOOL touchStart;
+NSDate *removeFingerStartTime;
+BOOL pressed;
+
 NSDate *touchStartTime;
 float middleclickX, middleclickY;
 float middleclickX2, middleclickY2;
