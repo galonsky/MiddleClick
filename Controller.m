@@ -27,22 +27,10 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 	
 	if(threeDown)
 	{
-		if(type == kCGEventLeftMouseDown)
+		if(type == kCGEventLeftMouseUp)
 		{
-#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-			CGEventPost (kCGHIDEventTap, CGEventCreateMouseEvent (NULL,kCGEventOtherMouseDown,ourLoc,kCGMouseButtonCenter));
-#else
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
-#endif
-		}
-		else if(type == kCGEventLeftMouseUp)
-		{
-#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-			CGEventPost (kCGHIDEventTap, CGEventCreateMouseEvent (NULL,kCGEventOtherMouseUp,ourLoc,kCGMouseButtonCenter));
-#else
 			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
-#endif
-			
 		}
 		return NULL;
 	}
@@ -117,118 +105,90 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 }
 
 int callback(int device, Finger *data, int nFingers, double timestamp, int frame) {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
 	
 	if(needToClick)
 	{
 		
 		if(nFingers == 3)
 		{
-			if(!pressed)
-			{
-				threeDown = YES;
-				CGEventTapEnable(tap, TRUE);
-				pressed = YES;
-			}
-			
+			threeDown = YES;
+			CGEventTapEnable(tap, TRUE);
 		}
-		
-		if(nFingers == 0) {
-			if(pressed)
-			{
-				threeDown = NO;
-				CGEventTapEnable(tap, FALSE);
-				
-				pressed = NO;
-			}
+		else
+		{
+			threeDown = NO;
+			CGEventTapEnable(tap, FALSE);
 		}
 	}
-	else
+	else 
 	{
-		if (nFingers==0)
-		{
-			if (removeFingerStartTime)
-			{
-				if (fabs([removeFingerStartTime timeIntervalSinceNow]) > 0.25)
+		if (nFingers==0){
+			touchStartTime = NULL;
+			if(middleclickX+middleclickY) {
+				float delta = ABS(middleclickX-middleclickX2)+ABS(middleclickY-middleclickY2); 
+				if (delta < 0.4f) {
+					// Emulate a middle click
+					
+					// get the current pointer location
+					CGEventRef ourEvent = CGEventCreate(NULL);
+					CGPoint ourLoc = CGEventGetLocation(ourEvent);
+					
+					/*
+					 // CMD+Click code
+					 CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, true );
+					 CGPostMouseEvent( ourLoc, 1, 1, 1);
+					 CGPostMouseEvent( ourLoc, 1, 1, 0);
+					 CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, false );
+					 */
+					
+					// Real middle click
+					CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
+					CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
+					
+				}
+			}
+			
+		} else if (nFingers>0 && touchStartTime == NULL){		
+			NSDate *now = [[NSDate alloc] init];
+			touchStartTime = [now retain];
+			[now release];
+			
+			maybeMiddleClick = YES;
+			middleclickX = 0.0f;
+			middleclickY = 0.0f;
+		} else {
+			if (maybeMiddleClick==YES){
+				NSTimeInterval elapsedTime = -[touchStartTime timeIntervalSinceNow];  
+				if (elapsedTime > 0.5f)
 					maybeMiddleClick = NO;
-				
-				[removeFingerStartTime release];
-				removeFingerStartTime = NULL;
 			}
-			
-			if (maybeMiddleClick == YES)
-			{
-				// Emulate a middle click
-				
-				// get the current pointer location
-				CGEventRef ourEvent = CGEventCreate(NULL);
-				CGPoint ourLoc = CGEventGetLocation(ourEvent);
-				
-				/*
-				 // CMD+Click code
-				 CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, true );
-				 CGPostMouseEvent( ourLoc, 1, 1, 1);
-				 CGPostMouseEvent( ourLoc, 1, 1, 0);
-				 CGPostKeyboardEvent( (CGCharCode)0, (CGKeyCode)55, false );
-				 */
-				
-				// Real middle click
-#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-				CGEventPost (kCGHIDEventTap, CGEventCreateMouseEvent (NULL,kCGEventOtherMouseDown,ourLoc,kCGMouseButtonCenter));
-				CGEventPost (kCGHIDEventTap, CGEventCreateMouseEvent (NULL,kCGEventOtherMouseUp,ourLoc,kCGMouseButtonCenter));
-#else
-				CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
-				CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
-#endif
-			}
-			
-			touchStart = FALSE;
-			maybeMiddleClick = NO;
 		}
 		
-		if (nFingers == 3)
-		{
+		if (nFingers>3) {
+			maybeMiddleClick = NO;
+			middleclickX = 0.0f;
+			middleclickY = 0.0f;
+		}
+		
+		if (nFingers==3) {
 			Finger *f1 = &data[0];
 			Finger *f2 = &data[1];
 			Finger *f3 = &data[2];
 			
-			[removeFingerStartTime release];
-			removeFingerStartTime = NULL;
-			
-			if (!touchStart)
-			{
-				touchStart = TRUE;
-				
-				maybeMiddleClick = YES;
-				
+			if (maybeMiddleClick==YES) {
 				middleclickX = (f1->normalized.pos.x+f2->normalized.pos.x+f3->normalized.pos.x);
 				middleclickY = (f1->normalized.pos.y+f2->normalized.pos.y+f3->normalized.pos.y);
+				middleclickX2 = middleclickX;
+				middleclickY2 = middleclickY;
+				maybeMiddleClick=NO;
+			} else {
+				middleclickX2 = (f1->normalized.pos.x+f2->normalized.pos.x+f3->normalized.pos.x);
+				middleclickY2 = (f1->normalized.pos.y+f2->normalized.pos.y+f3->normalized.pos.y);
 			}
-			else
-			{
-				if (maybeMiddleClick == YES)
-				{
-					float middleclickX2, middleclickY2;
-					
-					middleclickX2 = (f1->normalized.pos.x+f2->normalized.pos.x+f3->normalized.pos.x);
-					middleclickY2 = (f1->normalized.pos.y+f2->normalized.pos.y+f3->normalized.pos.y);
-					
-					float delta = ABS(middleclickX-middleclickX2)+ABS(middleclickY-middleclickY2);
-					if (delta > 0.1f)
-					{
-						maybeMiddleClick = NO;
-					}
-				}
-				
-			}
-		}
-		
-		if ((nFingers == 2) || (nFingers > 3))
-		{
-			if ((maybeMiddleClick == YES) && (removeFingerStartTime == NULL))
-				removeFingerStartTime = [[NSDate alloc] init];
 		}
 	}
+
 	
 	[pool release];
 	return 0;
