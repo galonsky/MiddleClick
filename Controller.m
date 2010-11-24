@@ -25,12 +25,16 @@ CGEventRef clickCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef eve
 	
 	CGPoint ourLoc = CGEventGetLocation(event);
 	
+	if (type == kCGEventLeftMouseUp) {
+		CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventOtherMouseUp, ourLoc, kCGMouseButtonCenter));
+		return NULL;
+	}
+	
 	if(threeDown)
 	{
-		if(type == kCGEventLeftMouseUp)
+		if(type == kCGEventLeftMouseDown)
 		{
-			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
-			CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
+			CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventOtherMouseDown, ourLoc, kCGMouseButtonCenter));
 		}
 		return NULL;
 	}
@@ -143,8 +147,8 @@ int callback(int device, Finger *data, int nFingers, double timestamp, int frame
 					 */
 					
 					// Real middle click
-					CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 1);
-					CGPostMouseEvent( ourLoc, 1, 3, 0, 0, 0);
+					CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventOtherMouseDown, ourLoc, kCGMouseButtonCenter));
+					CGEventPost(kCGHIDEventTap, CGEventCreateMouseEvent(NULL, kCGEventOtherMouseUp, ourLoc, kCGMouseButtonCenter));
 					
 				}
 			}
